@@ -29,6 +29,7 @@ jobs:
           ECR_REPOSITORY: casino-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          # Compilación inyectando estrictamente las 3 tags exigidas
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:v1.0.0 .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -45,12 +46,17 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Autenticar Docker dentro de la máquina EC2 remota de AWS
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+            
+            # Bajar la nueva versión construida del Frontend
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/casino-frontend:latest
+            
+            # Limpiar fachadas anteriores
             docker stop casino-frontend-prod || true
             docker rm casino-frontend-prod || true
             
-            # Inyección dinámica de la IP Privada del Backend. El Nginx lee esta variable perimetral interna.
+            # Lanzar el contenedor Web mapeando el puerto 80 e inyectando la IP privada del backend
             docker run -d --name casino-frontend-prod --restart always \
               -p 80:8080 \
               -e BACKEND_HOST=${{ secrets.EC2_BACKEND_PRIVATE_IP }} \
