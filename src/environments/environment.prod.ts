@@ -8,5 +8,5 @@
 // ============================================================
 export const environment = {
   production: true,
-  apiBaseUrl: ''   // ruta relativa: /api/... y /health
+  apiUrl: '/api'  // <-- IMPORTANTE: Solo '/api', sin localhost ni puertos.
 };
