@@ -8,5 +8,5 @@
 // ============================================================
 export const environment = {
   production: true,
-  apiUrl: '/api'  // <-- IMPORTANTE: Solo '/api', sin localhost ni puertos.
+  apiBaseUrl: '/api' // <-- CAMBIAR apiUrl POR apiBaseUrl
 };
